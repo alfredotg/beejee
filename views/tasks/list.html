@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Задачи</h2>
+
+    <p>
+        <a href="tasks/add" class="btn btn-primary">Добавить</a>
+    </p>
+
+    {% macro sort_link(sort_url, current_sort, field, name) %}
+        {% set asc_link = field ~ '-' ~ 'asc' %}
+        {% set desc_link = field ~ '-' ~ 'desc' %}
+        {% if current_sort == asc_link %}
+        <a href="{{ sort_url }}&sort={{ desc_link }}">{{ name }} &uarr;</a>
+        {% else  %}
+        <a href="{{ sort_url }}&sort={{ asc_link }}">{{ name }} 
+            {% if current_sort == desc_link %}
+                &darr;
+            {% endif %}
+        </a>
+        {% endif %}
+    {% endmacro %}
+
+    {% set user = di.auth.getUser() %}
+    <table class="table">
+        <thead>
+            <th></th>
+            <th>{{ _self.sort_link(sort_url, current_sort, 'username', 'Пользователь') }}</th>
+            <th>{{ _self.sort_link(sort_url, current_sort, 'email', 'Email') }}</th>
+            <th>{{ _self.sort_link(sort_url, current_sort, 'status', 'Статус') }}</th>
+            <th></th>
+            {% if user %}
+            <th></th>
+            {% endif %}
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.id }}</td>
+                <td>{{ task.username }}</td>
+                <td>{{ task.email }}</td>
+                <td>{{ task.getStatusText() }}</td>
+                <td>
+                {% if task.description_changed %}
+                отредактировано
+                {% endif %}
+                </td>
+                {% if user %}
+                <td><a href="tasks/edit/{{ task.id }}">Изменить</a></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        <nav>
+            <ul class="pagination">
+                {% for page in 1..pages %}
+                <li class="page-item {% if page == current_page %}active{% endif%}"><a class="page-link" href="{{ pager_url }}&page={{ page }}">{{ page }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </table>
+{% endblock %}
