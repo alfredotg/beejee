@@ -4,6 +4,7 @@ namespace BeeJee\Web;
 
 use BeeJee\Injectable;
 use BeeJee\ViewInterface;
+use BeeJee\UrlResolverInterface;
 use BeeJee\Web\RequestAttributes;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,10 +25,7 @@ class Controller extends Injectable
 
     protected function redirect(string $url): ResponseInterface
     {
-        $request = $this->di->get(ServerRequestInterface::class);
-        if ($base = $request->getAttribute(RequestAttributes::BASE_URI)) {
-            $url = $base . '/' . rtrim($url, '/');
-        }
+        $url = $this->di->get(UrlResolverInterface::class)->resolve($url);
         $response = new \Laminas\Diactoros\Response;
         return $response->withHeader('Location', $url)->withStatus(302);
     }

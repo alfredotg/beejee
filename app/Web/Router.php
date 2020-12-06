@@ -3,12 +3,12 @@
 namespace BeeJee\Web;
 
 use Laminas\Diactoros\Response;
-use League\Route\Http\Exception\HttpExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use BeeJee\Di;
+use BeeJee\UrlResolverInterface;
 
-class Router extends \League\Route\Router
+class Router extends \League\Route\Router implements UrlResolverInterface
 {
     protected $di;
 
@@ -49,15 +49,15 @@ class Router extends \League\Route\Router
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $request = $this->rewrite($request);
+        return parent::handle($this->rewrite($request));
+    }
 
-        try {
-            return parent::handle($request);
-        } catch (HttpExceptionInterface $error) {
-            $response = new Response();
-            $response->withStatus($error->getStatusCode());
-            $response->getBody()->write($error->getStatusCode().": " . $error->getMessage());
-            return $response;
+    public function resolve(string $url): string
+    {
+        $request = $this->di->get(ServerRequestInterface::class);
+        if ($base = $request->getAttribute(RequestAttributes::BASE_URI)) {
+            $url = $base . '/' . ltrim($url, '/');
         }
+        return $url;
     }
 }

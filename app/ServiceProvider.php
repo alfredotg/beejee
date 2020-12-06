@@ -34,10 +34,6 @@ class ServiceProvider extends Injectable
         $di->registre(Capsule::class, function () use ($capsule): Capsule {
             return $capsule;
         });
-
-        $di->registre(ConnectionInterface::class, function () use ($di): ConnectionInterface {
-            return $di->get(Capsule::class)->connection();
-        });
     }
 
     public function registreWeb(): void
@@ -53,7 +49,7 @@ class ServiceProvider extends Injectable
             );
         });
 
-        $di->registre(RequestHandlerInterface::class, function () use ($di): RequestHandlerInterface {
+        $di->registre(Web\Router::class, function () use ($di): RequestHandlerInterface {
             $router = new Web\Router($di);
             return $router;
         });
